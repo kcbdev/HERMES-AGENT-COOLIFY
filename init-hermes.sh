@@ -19,6 +19,7 @@ set -euo pipefail
 # ── Config ────────────────────────────────────────────────────────────────────
 HERMES_DATA_PATH="${HERMES_DATA_PATH:-/data/hermes}"
 HERMES_IMAGE="nousresearch/hermes-agent:latest"
+HERMES_DOMAIN="${HERMES_DOMAIN:-hermes.alanwar.ma}"
 
 # ── Colors ────────────────────────────────────────────────────────────────────
 GREEN='\033[0;32m'
@@ -128,6 +129,6 @@ echo "  3. Set volume: ${HERMES_DATA_PATH} → /opt/data"
 echo "  4. Paste env vars from .env.example into Coolify's Environment tab"
 echo "  5. Deploy"
 echo "  6. In Hermes Desktop → Settings → Gateway:"
-echo "       URL: https://hermes.alanwar.com"
+echo "       URL: https://${HERMES_DOMAIN}"
 echo "       Key: (the API_SERVER_KEY above)"
 echo ""
