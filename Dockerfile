@@ -21,14 +21,19 @@ FROM debian:bookworm-slim
 
 ARG HERMES_REF=main
 
-# ── System dependencies ──────────────────────────────────────────────────────
+# ── Node.js 20 LTS (required by baileys@7) ──────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git curl ca-certificates \
-        nodejs npm \
         python3 python3-pip python3-dev \
         gcc libffi-dev \
         ripgrep ffmpeg \
-        gosu \
+        gosu gnupg \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
+    && apt-get update \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Clone hermes-agent from upstream ─────────────────────────────────────────
