@@ -68,7 +68,7 @@ SSH into your Coolify server and run the init script once:
 
 ```bash
 # Download and run the init script
-curl -fsSL https://raw.githubusercontent.com/YOUR_REPO/hermes-coolify/main/init-hermes.sh | bash
+curl -fsSL https://raw.githubusercontent.com/kcbdev/HERMES-AGENT-COOLIFY/main/init-hermes.sh | bash
 
 # Or clone this repo and run locally:
 chmod +x init-hermes.sh
@@ -96,7 +96,7 @@ HERMES_DATA_PATH=/data/my-agent ./init-hermes.sh
 ### Option A — Git + Dockerfile (recommended)
 
 1. In Coolify → **New Resource → Git Repository**
-2. Repository URL: `https://github.com/YOUR_REPO/hermes-coolify`
+2. Repository URL: `https://github.com/kcbdev/HERMES-AGENT-COOLIFY`
 3. Dockerfile path: `Dockerfile`
 4. Branch: `main`
 
