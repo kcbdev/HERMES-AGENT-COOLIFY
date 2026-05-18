@@ -1,0 +1,92 @@
+# =============================================================================
+# docker-compose.coolify.yml — Hermes Agent on Coolify
+# =============================================================================
+#
+# Differences from upstream docker-compose.yml:
+#   - Uses bridge networking (not network_mode: host) — Coolify proxy compatible
+#   - API server enabled and exposed on 8642 for Hermes Desktop
+#   - Dashboard exposed on 9119 behind Coolify's Caddy reverse proxy
+#   - Explicit UID/GID for volume permission control
+#
+# Deploy:
+#   HERMES_UID=$(id -u) HERMES_GID=$(id -g) \
+#   API_SERVER_KEY=changeme \
+#   docker compose -f docker-compose.coolify.yml up -d
+#
+# =============================================================================
+
+services:
+
+  # ── Gateway (main agent process) ────────────────────────────────────────────
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        HERMES_REF: main          # Pin to a tag or SHA for reproducible builds
+    image: hermes-agent:latest
+    container_name: hermes-gateway
+    restart: unless-stopped
+
+    command: ["gateway", "run"]
+
+    ports:
+      # API server — Hermes Desktop connects here (via Coolify domain + SSL)
+      - "127.0.0.1:8642:8642"
+
+    volumes:
+      # All agent state: config, keys, memory, sessions, skills
+      - ${HERMES_DATA_PATH:-/data/hermes}:/opt/data
+
+    environment:
+      # Volume ownership — match the UID/GID that owns HERMES_DATA_PATH on host
+      - HERMES_UID=${HERMES_UID:-1000}
+      - HERMES_GID=${HERMES_GID:-1000}
+
+      # ── API Server (required for Hermes Desktop connection) ─────────────────
+      # Enables the OpenAI-compatible API server on port 8642
+      - API_SERVER_HOST=0.0.0.0
+      - API_SERVER_KEY=${API_SERVER_KEY:?API_SERVER_KEY is required}
+
+      # ── Model provider — set exactly ONE of the following ───────────────────
+      # OpenRouter (recommended — 200+ models, single key)
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      # Anthropic direct
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      # OpenAI direct
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      # Local / OpenAI-compatible endpoint (Ollama, vLLM, LM Studio, etc.)
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8642/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+    # Playwright browser automation needs extra shared memory
+    shm_size: "1gb"
+
+  # ── Dashboard (optional web UI) ─────────────────────────────────────────────
+  dashboard:
+    image: hermes-agent:latest   # Reuses the image built by gateway service
+    container_name: hermes-dashboard
+    restart: unless-stopped
+
+    command: ["dashboard", "--host", "0.0.0.0", "--no-open"]
+
+    depends_on:
+      gateway:
+        condition: service_healthy
+
+    ports:
+      # Dashboard — serve behind Coolify domain (Caddy adds SSL)
+      - "127.0.0.1:9119:9119"
+
+    volumes:
+      - ${HERMES_DATA_PATH:-/data/hermes}:/opt/data
+
+    environment:
+      - HERMES_UID=${HERMES_UID:-1000}
+      - HERMES_GID=${HERMES_GID:-1000}
