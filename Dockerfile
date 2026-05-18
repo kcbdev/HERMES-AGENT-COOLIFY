@@ -36,6 +36,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
+# ── hermes runtime user (matches upstream UID 10000) ──────────────────────────
+RUN useradd -u 10000 -m -d /opt/data hermes
+
 # ── Clone hermes-agent from upstream ─────────────────────────────────────────
 RUN git clone --depth=1 --branch "${HERMES_REF}" \
         https://github.com/NousResearch/hermes-agent /opt/hermes \
@@ -58,8 +61,10 @@ RUN if [ -d /opt/hermes/scripts/whatsapp-bridge ]; then \
         npm install --prefix /opt/hermes/scripts/whatsapp-bridge; \
     fi
 
-# ── Entrypoint permissions ────────────────────────────────────────────────────
-RUN chmod +x /opt/hermes/docker/entrypoint.sh
+# ── Fix ownership for hermes runtime user ───────────────────────────────────
+RUN chown -R hermes:hermes /opt/hermes \
+    && chmod -R a+rX /opt/hermes \
+    && chmod +x /opt/hermes/docker/entrypoint.sh
 
 # ── Runtime config ────────────────────────────────────────────────────────────
 ENV HERMES_HOME=/opt/data
