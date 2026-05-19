@@ -28,7 +28,7 @@ services:
     container_name: hermes-gateway
     restart: unless-stopped
 
-    command: ["gateway", "run", "--host", "0.0.0.0"]
+    command: ["gateway", "run"]
 
     ports:
       # API server — Hermes Desktop connects here (via Coolify domain + SSL)
@@ -45,7 +45,9 @@ services:
 
       # ── API Server (required for Hermes Desktop connection) ─────────────────
       # Enables the OpenAI-compatible API server on port 8642
+      - API_SERVER_ENABLED=true
       - API_SERVER_HOST=0.0.0.0
+      - API_SERVER_PORT=8642
       - API_SERVER_KEY=${API_SERVER_KEY:?API_SERVER_KEY is required}
 
       # ── Model provider — set exactly ONE of the following ───────────────────
@@ -59,7 +61,7 @@ services:
       - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8642/health || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:8642/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
