@@ -32,7 +32,7 @@ services:
 
     ports:
       # API server — Hermes Desktop connects here (via Coolify domain + SSL)
-      - "127.0.0.1:8642:8642"
+      - "0.0.0.0:8642:8642"
 
     volumes:
       # All agent state: config, keys, memory, sessions, skills
@@ -82,7 +82,7 @@ services:
 
     ports:
       # Dashboard — serve behind Coolify domain (Caddy adds SSL)
-      - "127.0.0.1:9119:9119"
+      - "0.0.0.0:9119:9119"
 
     volumes:
       - ${HERMES_DATA_PATH:-/data/hermes}:/opt/data
