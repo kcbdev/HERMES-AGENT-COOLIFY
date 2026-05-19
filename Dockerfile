@@ -56,6 +56,9 @@ RUN /opt/hermes/.venv/bin/pip install -e ".[all]" --break-system-packages --no-c
 # ── Node dependencies (gateway web UI) ───────────────────────────────────────
 RUN npm install --prefix /opt/hermes
 
+# ── Build web UI for dashboard ─────────────────────────────────────────────────
+RUN cd /opt/hermes/web && npm install && npm run build
+
 # ── Playwright browsers ───────────────────────────────────────────────────────
 RUN npx playwright install --with-deps chromium
 
