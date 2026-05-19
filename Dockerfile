@@ -47,8 +47,11 @@ RUN git clone --depth=1 --branch "${HERMES_REF}" \
 
 WORKDIR /opt/hermes
 
+# ── Create venv (matching upstream's .venv setup) ─────────────────────────────
+RUN python3 -m venv /opt/hermes/.venv
+
 # ── Python package install ────────────────────────────────────────────────────
-RUN pip install -e ".[all]" --break-system-packages --no-cache-dir
+RUN /opt/hermes/.venv/bin/pip install -e ".[all]" --break-system-packages --no-cache-dir
 
 # ── Node dependencies (gateway web UI) ───────────────────────────────────────
 RUN npm install --prefix /opt/hermes
@@ -61,9 +64,11 @@ RUN if [ -d /opt/hermes/scripts/whatsapp-bridge ]; then \
         npm install --prefix /opt/hermes/scripts/whatsapp-bridge; \
     fi
 
-# ── Fix ownership for hermes runtime user ───────────────────────────────────
-RUN chown -R hermes:hermes /opt/hermes \
-    && chmod -R a+rX /opt/hermes \
+# ── Fix ownership for hermes runtime user (matching upstream approach) ─────
+# Make install dir world-readable so any HERMES_UID can read it at runtime.
+# The .venv and node_modules need to be writable by hermes (for lazy_deps and runtime npm).
+RUN chmod -R a+rX /opt/hermes \
+    && chown -R hermes:hermes /opt/hermes/.venv /opt/hermes/node_modules \
     && chmod +x /opt/hermes/docker/entrypoint.sh
 
 # ── Runtime config ────────────────────────────────────────────────────────────
