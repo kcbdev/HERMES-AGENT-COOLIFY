@@ -73,6 +73,9 @@ RUN chmod -R a+rX /opt/hermes \
 
 # ── Runtime config ────────────────────────────────────────────────────────────
 ENV HERMES_HOME=/opt/data
+ENV API_SERVER_ENABLED=true
+ENV API_SERVER_HOST=0.0.0.0
+ENV API_SERVER_PORT=8642
 
 # Data volume — all agent state lives here (config, memory, sessions, skills)
 VOLUME ["/opt/data"]
