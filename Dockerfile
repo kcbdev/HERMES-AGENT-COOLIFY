@@ -24,7 +24,7 @@ ARG HERMES_REF=main
 # ── Node.js 20 LTS (required by baileys@7) ──────────────────────────────────
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git curl ca-certificates \
-        python3 python3-pip python3-dev \
+        python3 python3-pip python3-dev python3-venv \
         gcc libffi-dev \
         ripgrep ffmpeg \
         gosu gnupg \
